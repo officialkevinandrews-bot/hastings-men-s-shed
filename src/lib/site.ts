@@ -10,6 +10,7 @@ export const SITE = {
   emailHref: "mailto:info@hastingsmenshed.org.uk",
   salesEmail: "sales@hastingsmenshed.org.uk",
   salesEmailHref: "mailto:sales@hastingsmenshed.org.uk",
+  facebookUrl: "https://www.facebook.com/profile.php?id=61561735482398",
   donateUrl: "https://pay.sumup.com/b2c/QMPIUPBZ",
   charityCommissionUrl: "https://register-of-charities.charitycommission.gov.uk/en/charity-search/-/charity-details/5105383",
   mapsUrl: "https://www.google.com/maps/search/?api=1&query=20+Manhattan+Gardens+Hastings+TN35+5DQ",

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, MapPin, Mail, HeartHandshake } from "lucide-react";
 import { SITE, OPENING, SUPPORTER_LOGOS } from "@/lib/site";
+import { FacebookIcon } from "@/components/site/FacebookIcon";
 
 export function Footer() {
   return (
@@ -53,6 +54,14 @@ export function Footer() {
             <p className="mt-3 text-xs text-primary-foreground/75">
               Commissions, repairs &amp; item sales enquiries: <a href={SITE.emailHref} className="underline">{SITE.email}</a>
             </p>
+            <a
+              href={SITE.facebookUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#1877F2] px-4 py-2 text-sm font-bold text-white shadow-xs transition hover:bg-[#1565D8]"
+            >
+              <FacebookIcon className="h-4 w-4" /> Follow us on Facebook
+            </a>
           </div>
           <div>
             <h3 className="text-lg font-bold text-accent">Weekly session times</h3>
