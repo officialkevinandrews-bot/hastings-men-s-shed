@@ -62,6 +62,41 @@ export const SUPPORTERS = [
   "The Muffin Club",
 ];
 
+export const SUPPORTER_LOGOS = [
+  {
+    name: "Sussex Community Foundation",
+    logo: "/images/supporters/sussex-community-foundation.png",
+  },
+  {
+    name: "The National Lottery Community Fund",
+    logo: "/images/supporters/national-lottery-community-fund.png",
+  },
+  {
+    name: "Southern Water Community Grant",
+    logo: "/images/supporters/southern-water.png",
+  },
+  {
+    name: "North East Hastings Big Local",
+    logo: "/images/supporters/big-local-ne-hastings.png",
+  },
+  {
+    name: "The Muffin Club",
+    logo: "/images/supporters/the-muffin-club.png",
+  },
+  {
+    name: "The Julia and Hans Rausing Trust",
+    logo: "/images/supporters/julia-and-hans-rausing-trust.png",
+  },
+  {
+    name: "Hastings Voluntary Action",
+    logo: "/images/supporters/hastings-voluntary-action.png",
+  },
+  {
+    name: "Ore in Bloom",
+    logo: "/images/supporters/ore-in-bloom.png",
+  },
+] as const;
+
 export const FRIENDS_OF_SHED = [
   {
     name: "Ore Community Centre & The Sunflower Café",
