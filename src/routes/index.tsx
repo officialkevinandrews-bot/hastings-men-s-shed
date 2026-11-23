@@ -3,7 +3,7 @@ import { Coffee, Hammer, Users, HeartHandshake, ArrowRight, Clock, ShieldCheck, 
 import { WELCOME_PHOTO } from "@/lib/gallery";
 import { ShedVideo } from "@/components/site/ShedVideo";
 import { Gallery } from "@/components/site/Gallery";
-import { OPENING, SUPPORTERS, SITE, WORKSHOP_PHOTOS } from "@/lib/site";
+import { OPENING, SITE, WORKSHOP_PHOTOS } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -239,16 +239,7 @@ function Index() {
         <div className="mt-8"><Gallery limit={8} /></div>
       </section>
 
-      <section className="border-y border-border bg-card py-14">
-        <div className="mx-auto max-w-6xl px-4">
-          <p className="text-center font-bold uppercase tracking-widest text-muted-foreground">Gratefully supported by our grant providers &amp; community friends</p>
-          <ul className="mt-6 flex flex-wrap justify-center gap-3">
-            {SUPPORTERS.map((s) => <li key={s} className="rounded-full border border-border bg-background px-4 py-2 text-sm font-semibold">{s}</li>)}
-          </ul>
-        </div>
-      </section>
-
-      <section className="mx-auto mt-20 max-w-6xl px-4">
+      <section className="mx-auto max-w-6xl px-4">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-3xl bg-primary p-10 text-primary-foreground">
             <h2 className="text-3xl font-extrabold">Commissions, repairs &amp; item sales</h2>
