@@ -97,29 +97,67 @@ export const SUPPORTER_LOGOS = [
   },
 ] as const;
 
-export const FRIENDS_OF_SHED = [
+export const GRANT_SUPPORTERS = [
   {
-    name: "Ore Community Centre & The Sunflower Café",
-    desc: "Right next door to our workshops — the free parking for our less mobile members and wonderful food from Jordan in the Café are invaluable.",
+    name: "North East Hastings Big Local",
+    logo: "/images/supporters/big-local-ne-hastings.png",
+    desc: "Big Local enables residents in 150 areas across England to use at least £1m to make a lasting positive difference to their communities — bringing together local talent, ambitions, skills, and energy from individuals and groups to make their area a better place to live.",
+  },
+  {
+    name: "The National Lottery Community Fund",
+    logo: "/images/supporters/national-lottery-community-fund.png",
+    desc: "The National Lottery raises money for good causes, enabling local people to take the lead in improving their lives and communities. Every National Lottery ticket helps make community funding possible for groups of all shapes and sizes.",
+  },
+  {
+    name: "The Julia and Hans Rausing Trust",
+    logo: "/images/supporters/julia-and-hans-rausing-trust.png",
+    desc: "Hans Rausing is one of the UK's foremost philanthropists, supporting a wide range of charitable causes and community organisations across the country through the Julia and Hans Rausing Trust and its predecessor trusts since the 1990s.",
+  },
+  {
+    name: "Sussex Community Foundation",
+    logo: "/images/supporters/sussex-community-foundation.png",
+    desc: "A registered charity that exists to make Sussex a fairer and more equal place by enabling local people to support local causes, providing vital grants to small charities and voluntary groups working in communities across Sussex.",
+  },
+  {
+    name: "Southern Water (Community Grant & Goodwill Fund)",
+    logo: "/images/supporters/southern-water.png",
+    desc: "We are very grateful for the financial support provided by Southern Water — their community grant in 2025 allows us to continue our charitable work supporting residents in Hastings & St Leonards.",
+  },
+  {
+    name: "The Hastings & St Leonards Muffin Club",
+    logo: "/images/supporters/the-muffin-club.png",
+    desc: "Since 1952, the Hastings & St Leonards Muffin Club has raised funds through community functions and distributed this money to worthy causes, deserving local charities, and individuals in need within the Borough of Hastings.",
   },
   {
     name: "Hastings Voluntary Action (HVA)",
-    desc: "Providing vital charity guidance, governance advice and local voluntary sector support — we couldn't survive without them.",
+    logo: "/images/supporters/hastings-voluntary-action.png",
+    desc: "Enhancing the quality of life of people in the Hastings area by promoting voluntary action and supporting the development of local initiatives to meet community needs. We are deeply grateful for all of their advice and support.",
+  },
+] as const;
+
+export const FRIENDS_OF_SHED = [
+  {
+    name: "Ore Community Centre & The Sunflower Café",
+    desc: "The parking for our less mobile members and wonderful food from Jordan in the Café is invaluable.",
   },
   {
     name: "Ore in Bloom",
-    desc: "Looking after our borders and collaborating with our members on planters and green spaces that brighten the local area.",
+    desc: "Many thanks to all at Ore in Bloom for making such a good job of our borders — what a difference!",
+  },
+  {
+    name: "Hastings Voluntary Action",
+    desc: "Thank you for all the advice and support — we couldn't survive without you.",
   },
   {
     name: "Alexandra Park Greenhouse",
-    desc: "Inviting the Shed to showcase local craft at events like World Wood Day and partnering on community initiatives.",
+    desc: "Thank you for inviting us to your 'World Wood Day' event in 2025! We look forward to further collaborations with you.",
   },
   {
-    name: "Umbrella Sussex (Library of Things & Make & Mend)",
-    desc: "Sharing a common charitable ethos of skill-sharing, repair, reuse and community connection in Hastings.",
+    name: "Umbrella Sussex",
+    desc: "Hastings Library of Things and Make & Mend — what more appropriate friend of the Shed could you think of!",
   },
   {
-    name: "Tools With A Mission (TWAM)",
-    desc: "Providing a worthwhile second home for our surplus donated tools — much better to share and empower others than send tools to landfill.",
+    name: "Tools With A Mission",
+    desc: "Glad we have a good home for our excess tools — much better to share than dump in landfill.",
   },
 ] as const;

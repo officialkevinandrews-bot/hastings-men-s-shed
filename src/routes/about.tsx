@@ -13,7 +13,7 @@ import {
   Quote,
 } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
-import { SITE, SUPPORTERS, FRIENDS_OF_SHED, TRUSTEES, WORKSHOP_PHOTOS } from "@/lib/site";
+import { SITE, GRANT_SUPPORTERS, FRIENDS_OF_SHED, TRUSTEES, WORKSHOP_PHOTOS } from "@/lib/site";
 import { photo } from "@/lib/gallery";
 
 export const Route = createFileRoute("/about")({
@@ -251,44 +251,52 @@ function About() {
       {/* GRANT PROVIDERS & TRUSTEES */}
       <section className="border-t border-border bg-card py-16">
         <div className="mx-auto max-w-6xl px-4">
-          <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
-            <div>
-              <div className="flex items-center gap-3">
-                <Award className="h-8 w-8 text-primary" />
-                <h2 className="text-3xl font-extrabold">Our grant providers &amp; supporters</h2>
-              </div>
-              <p className="mt-3 text-muted-foreground">
-                We are incredibly grateful to all the grant funders, trusts, and local supporters whose generosity keeps our workshops equipped and our doors open:
-              </p>
-              <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-                {SUPPORTERS.map((s) => (
-                  <li key={s} className="rounded-xl border border-border bg-background p-4 font-bold">
-                    <span className="mb-2 block h-1 w-10 stripe-bar rounded-full" />
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
+          <div className="flex items-center gap-3">
+            <Award className="h-8 w-8 text-primary" />
+            <h2 className="text-3xl font-extrabold md:text-4xl">Our grant providers &amp; supporters</h2>
+          </div>
+          <p className="mt-3 max-w-3xl text-lg text-muted-foreground">
+            We are incredibly grateful to all our grant providers and supporters who have funded and backed our charitable work in Hastings &amp; St Leonards:
+          </p>
 
-            <div className="rounded-3xl border border-border bg-background p-8 shadow-soft">
-              <p className="font-bold uppercase tracking-widest text-primary">100% Volunteer-Led Governance</p>
-              <h3 className="mt-2 text-2xl font-extrabold">Our Charity Trustees</h3>
-              <p className="mt-3 text-sm text-muted-foreground">
-                {SITE.legalName} (Registered Charity No. {SITE.charityNumber}) is governed by unpaid Trustees elected annually and supported by co-opted volunteers:
-              </p>
-              <ul className="mt-5 space-y-3">
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            {GRANT_SUPPORTERS.map((s) => (
+              <div key={s.name} className="flex flex-col justify-between rounded-2xl border border-border bg-background p-6 shadow-soft">
+                <div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-28 shrink-0 items-center justify-center rounded-xl border border-border bg-white p-2">
+                      <img src={s.logo} alt={s.name} className="max-h-12 w-auto max-w-full object-contain" loading="lazy" />
+                    </div>
+                    <h3 className="text-xl font-extrabold">{s.name}</h3>
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-12 rounded-3xl border border-border bg-background p-8 shadow-soft">
+            <div className="grid items-center gap-8 md:grid-cols-[1.2fr_1fr]">
+              <div>
+                <p className="font-bold uppercase tracking-widest text-primary">100% Volunteer-Led Governance</p>
+                <h3 className="mt-2 text-2xl font-extrabold">Our Charity Trustees</h3>
+                <p className="mt-3 text-muted-foreground">
+                  {SITE.legalName} (Registered Charity No. {SITE.charityNumber}) is run purely by volunteers. The management, objectives, and operation of the Shed are overseen by unpaid Trustees elected annually and supported by co-opted volunteers.
+                </p>
+                <div className="mt-5">
+                  <Link to="/policies" className="inline-flex items-center gap-1.5 font-bold text-primary underline">
+                    Read our CIO Constitution &amp; Policies <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+              <ul className="space-y-3 rounded-2xl border border-border bg-card p-6">
                 {TRUSTEES.map((t) => (
-                  <li key={t.name} className="flex items-center justify-between border-b border-border pb-2.5 last:border-0">
+                  <li key={t.name} className="flex items-center justify-between border-b border-border pb-2.5 last:border-0 last:pb-0">
                     <span className="font-bold">{t.name}</span>
                     <span className="text-sm font-semibold text-primary">{t.role}</span>
                   </li>
                 ))}
               </ul>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link to="/policies" className="inline-flex items-center gap-1.5 text-sm font-bold text-primary underline">
-                  Read our CIO Constitution &amp; Policies <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
             </div>
           </div>
         </div>
