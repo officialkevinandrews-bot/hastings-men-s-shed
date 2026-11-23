@@ -1,7 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-export const ENQUIRY_TYPES = ["Custom woodwork / commission", "Furniture repair", "Bench or garden item", "Community project", "Something else"] as const;
+export const ENQUIRY_TYPES = [
+  "Custom woodwork / commission",
+  "Furniture or item repair",
+  "Buying a Shed-made item",
+  "Bench or garden item",
+  "Community or charity project",
+  "Joining / visiting / referral enquiry",
+  "Something else",
+] as const;
 
 // Notification recipient for testing only. Do not switch to sales@hastingsmenshed.org.uk until instructed.
 export const ENQUIRY_NOTIFY_TO = "officialkevinandrews@gmail.com";
