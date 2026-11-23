@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as CommissionsRouteImport } from './routes/commissions'
+import { Route as DonateRouteImport } from './routes/donate'
+import { Route as MadeInTheShedRouteImport } from './routes/made-in-the-shed'
+import { Route as PoliciesRouteImport } from './routes/policies'
+import { Route as VisitRouteImport } from './routes/visit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CommissionsRoute = CommissionsRouteImport.update({
+  id: '/commissions',
+  path: '/commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DonateRoute = DonateRouteImport.update({
+  id: '/donate',
+  path: '/donate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MadeInTheShedRoute = MadeInTheShedRouteImport.update({
+  id: '/made-in-the-shed',
+  path: '/made-in-the-shed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliciesRoute = PoliciesRouteImport.update({
+  id: '/policies',
+  path: '/policies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VisitRoute = VisitRouteImport.update({
+  id: '/visit',
+  path: '/visit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/commissions': typeof CommissionsRoute
+  '/donate': typeof DonateRoute
+  '/made-in-the-shed': typeof MadeInTheShedRoute
+  '/policies': typeof PoliciesRoute
+  '/visit': typeof VisitRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/commissions': typeof CommissionsRoute
+  '/donate': typeof DonateRoute
+  '/made-in-the-shed': typeof MadeInTheShedRoute
+  '/policies': typeof PoliciesRoute
+  '/visit': typeof VisitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/commissions': typeof CommissionsRoute
+  '/donate': typeof DonateRoute
+  '/made-in-the-shed': typeof MadeInTheShedRoute
+  '/policies': typeof PoliciesRoute
+  '/visit': typeof VisitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/commissions'
+    | '/donate'
+    | '/made-in-the-shed'
+    | '/policies'
+    | '/visit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/commissions'
+    | '/donate'
+    | '/made-in-the-shed'
+    | '/policies'
+    | '/visit'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/commissions'
+    | '/donate'
+    | '/made-in-the-shed'
+    | '/policies'
+    | '/visit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CommissionsRoute: typeof CommissionsRoute
+  DonateRoute: typeof DonateRoute
+  MadeInTheShedRoute: typeof MadeInTheShedRoute
+  PoliciesRoute: typeof PoliciesRoute
+  VisitRoute: typeof VisitRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +130,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/commissions': {
+      id: '/commissions'
+      path: '/commissions'
+      fullPath: '/commissions'
+      preLoaderRoute: typeof CommissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/donate': {
+      id: '/donate'
+      path: '/donate'
+      fullPath: '/donate'
+      preLoaderRoute: typeof DonateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/made-in-the-shed': {
+      id: '/made-in-the-shed'
+      path: '/made-in-the-shed'
+      fullPath: '/made-in-the-shed'
+      preLoaderRoute: typeof MadeInTheShedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policies': {
+      id: '/policies'
+      path: '/policies'
+      fullPath: '/policies'
+      preLoaderRoute: typeof PoliciesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/visit': {
+      id: '/visit'
+      path: '/visit'
+      fullPath: '/visit'
+      preLoaderRoute: typeof VisitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  CommissionsRoute: CommissionsRoute,
+  DonateRoute: DonateRoute,
+  MadeInTheShedRoute: MadeInTheShedRoute,
+  PoliciesRoute: PoliciesRoute,
+  VisitRoute: VisitRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

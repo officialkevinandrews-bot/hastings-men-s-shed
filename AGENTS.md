@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Site pages live as separate routes under src/routes with shared Header/Footer in __root; why: crawlable, shareable pages.
+- Shed photos are CDN asset pointers in src/assets/shed, captions/categories mapped in src/lib/gallery.ts; why: one place to edit the showcase.
+- Enquiries are inserted server-side via createServerFn (src/lib/enquiries.functions.ts) with RLS locking the table to service role; why: visitors can never read submissions.
