@@ -7,6 +7,7 @@ import {
   FileText,
   Users,
   ShieldCheck,
+  Globe,
   ArrowRight,
   ExternalLink,
 } from "lucide-react";
@@ -21,7 +22,8 @@ export type AdminTabKey =
   | "notice"
   | "text"
   | "people"
-  | "admins";
+  | "admins"
+  | "domain";
 
 interface OverviewTabProps {
   data: AdminDashboardPayload;
@@ -86,12 +88,20 @@ export function OverviewTab({ data, onSelectTab }: OverviewTabProps) {
   ];
 
   if (data.currentAdmin.role === "owner") {
-    shortcuts.push({
-      tab: "admins",
-      icon: ShieldCheck,
-      title: "Manage who can sign in",
-      desc: "Add or remove authorised committee admins (Owner only).",
-    });
+    shortcuts.push(
+      {
+        tab: "admins",
+        icon: ShieldCheck,
+        title: "Manage who can sign in",
+        desc: "Add or remove authorised committee admins (Owner only).",
+      },
+      {
+        tab: "domain",
+        icon: Globe,
+        title: "Connect hastingsmenshed.org.uk",
+        desc: "Live DNS status checker, email safety check, and step-by-step Kualo guide (Owner only).",
+      },
+    );
   }
 
   return (

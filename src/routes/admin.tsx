@@ -12,6 +12,7 @@ import {
   FileText,
   Users,
   ShieldCheck,
+  Globe,
   LogOut,
   ExternalLink,
   Loader2,
@@ -35,6 +36,7 @@ import { NoticeBannerTab } from "@/components/admin/NoticeBannerTab";
 import { PageTextTab } from "@/components/admin/PageTextTab";
 import { ShedPeopleTab } from "@/components/admin/ShedPeopleTab";
 import { AdminTeamTab } from "@/components/admin/AdminTeamTab";
+import { DomainGoLiveTab } from "@/components/admin/DomainGoLiveTab";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin")({
@@ -146,7 +148,10 @@ function AdminPage() {
   ];
 
   if (dashboard.currentAdmin.role === "owner") {
-    navItems.push({ key: "admins", label: "Admin Access", icon: ShieldCheck });
+    navItems.push(
+      { key: "admins", label: "Admin Access", icon: ShieldCheck },
+      { key: "domain", label: "Domain & Go-Live", icon: Globe },
+    );
   }
 
   return (
@@ -296,6 +301,9 @@ function AdminPage() {
               admins={dashboard.admins}
               onRefresh={handleRefresh}
             />
+          )}
+          {activeTab === "domain" && (
+            <DomainGoLiveTab currentAdmin={dashboard.currentAdmin} />
           )}
         </main>
       </div>

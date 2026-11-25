@@ -9,6 +9,12 @@ import {
   type RawCmsTables,
   type SiteContentBundle,
 } from "@/lib/cms-defaults";
+import {
+  SHED_DOMAIN,
+  evaluateDomainDns,
+  type DomainDnsSnapshot,
+  type EvaluatedDomainStatus,
+} from "@/lib/domain-check";
 
 export interface AdminUserRecord {
   id: string;
@@ -928,4 +934,63 @@ export const removeAdminUser = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.from("admin_users").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true as const };
+  });
+
+// ---------- OWNER-ONLY LIVE DNS & DOMAIN TRANSITION CHECK ----------
+
+interface DohJsonResponse {
+  Answer?: Array<{ name: string; type: number; TTL: number; data: string }>;
+}
+
+async function queryDoh(name: string, type: "A" | "AAAA" | "CNAME" | "MX" | "TXT" | "NS"): Promise<string[]> {
+  try {
+    const res = await fetch(
+      `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${type}`,
+      { headers: { Accept: "application/dns-json" } },
+    );
+    if (!res.ok) return [];
+    const json = (await res.json()) as DohJsonResponse;
+    const typeNum: Record<string, number> = { A: 1, NS: 2, CNAME: 5, MX: 15, TXT: 16, AAAA: 28 };
+    const want = typeNum[type];
+    return (json.Answer ?? [])
+      .filter((a) => a.type === want)
+      .map((a) => String(a.data).trim());
+  } catch {
+    return [];
+  }
+}
+
+export const checkDomainDnsStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ snapshot: DomainDnsSnapshot; status: EvaluatedDomainStatus }> => {
+    await requireOwner(context.claims);
+    const domain = SHED_DOMAIN;
+
+    const [rootA, rootAAAA, wwwA, wwwCname, mailA, mailCname, lovableTxt, mx, ns] = await Promise.all([
+      queryDoh(domain, "A"),
+      queryDoh(domain, "AAAA"),
+      queryDoh(`www.${domain}`, "A"),
+      queryDoh(`www.${domain}`, "CNAME"),
+      queryDoh(`mail.${domain}`, "A"),
+      queryDoh(`mail.${domain}`, "CNAME"),
+      queryDoh(`_lovable.${domain}`, "TXT"),
+      queryDoh(domain, "MX"),
+      queryDoh(domain, "NS"),
+    ]);
+
+    const snapshot: DomainDnsSnapshot = {
+      domain,
+      checkedAt: new Date().toISOString(),
+      rootA,
+      rootAAAA,
+      wwwA,
+      wwwCname,
+      mailA,
+      mailCname,
+      lovableTxt,
+      mx,
+      ns,
+    };
+
+    return { snapshot, status: evaluateDomainDns(snapshot) };
   });

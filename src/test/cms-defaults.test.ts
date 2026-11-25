@@ -7,6 +7,13 @@ import {
   normalizePhoneHref,
   slugify,
 } from "@/lib/cms-defaults";
+import {
+  KUALO_ORIGIN_IP,
+  LOVABLE_TARGET_IP,
+  SHED_DOMAIN,
+  buildKualoSupportTicket,
+  evaluateDomainDns,
+} from "@/lib/domain-check";
 
 describe("CMS defaults and safe merging", () => {
   it("provides complete defaults for all image slots, text blocks, hours, and gallery items", () => {
@@ -113,5 +120,51 @@ describe("CMS defaults and safe merging", () => {
     const summary = formatOpeningSummaryLine(buildDefaultSiteContent().openingHours);
     expect(summary).toContain("Mon 10am–1pm");
     expect(summary).toContain("2nd & 4th Sat 10am–1pm");
+  });
+
+  it("correctly evaluates pre-cutover and live Lovable DNS status and protects mail subdomain", () => {
+    const before = evaluateDomainDns({
+      domain: SHED_DOMAIN,
+      checkedAt: new Date().toISOString(),
+      rootA: [KUALO_ORIGIN_IP],
+      rootAAAA: [],
+      wwwA: [KUALO_ORIGIN_IP],
+      wwwCname: [`${SHED_DOMAIN}.`],
+      mailA: [KUALO_ORIGIN_IP],
+      mailCname: [`${SHED_DOMAIN}.`],
+      lovableTxt: [],
+      mx: ["10 mail1.filteredmx.net."],
+      ns: ["ns1.kualo.net."],
+    });
+    expect(before.websiteLiveOnLovable).toBe(false);
+    expect(before.mailIsStillCnameToRoot).toBe(true);
+    expect(before.mailSafe).toBe(false);
+    expect(before.checks.mailSubdomain.level).toBe("warning");
+    expect(before.checks.emailMx.level).toBe("ok");
+
+    const after = evaluateDomainDns({
+      domain: SHED_DOMAIN,
+      checkedAt: new Date().toISOString(),
+      rootA: [LOVABLE_TARGET_IP],
+      rootAAAA: [],
+      wwwA: [LOVABLE_TARGET_IP],
+      wwwCname: [`${SHED_DOMAIN}.`],
+      mailA: [KUALO_ORIGIN_IP],
+      mailCname: [],
+      lovableTxt: ['"lovable_verify=abc123"'],
+      mx: ["10 mail1.filteredmx.net."],
+      ns: ["ns1.kualo.net."],
+    });
+    expect(after.websiteLiveOnLovable).toBe(true);
+    expect(after.mailSafe).toBe(true);
+    expect(after.lovableVerifiedTxtFound).toBe(true);
+    expect(after.checks.websiteA.level).toBe("ok");
+    expect(after.checks.mailSubdomain.level).toBe("ok");
+    expect(after.checks.lovableTxt.level).toBe("ok");
+
+    const ticket = buildKualoSupportTicket("lovable_verify=xyz999");
+    expect(ticket).toContain(KUALO_ORIGIN_IP);
+    expect(ticket).toContain(LOVABLE_TARGET_IP);
+    expect(ticket).toContain("lovable_verify=xyz999");
   });
 });
