@@ -50,27 +50,34 @@ function Index() {
               </a>
             </div>
           </div>
-          <div className="relative">
+          <div className="space-y-3 sm:space-y-4">
             <img
               src={WORKSHOP_PHOTOS.mainHall}
               alt="Members chatting inside the Godfrey Bevan Workshops at Hastings & St Leonards Men's Shed"
-              className="aspect-[4/3] w-full rounded-3xl object-cover shadow-soft"
+              className="aspect-[16/10] w-full rounded-3xl object-cover shadow-soft"
             />
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <img
                 src={WORKSHOP_PHOTOS.woodworkingBench}
                 alt="Member restoring a wooden chair at the workshop bench"
-                className="h-32 w-full rounded-2xl object-cover shadow-soft"
+                className="aspect-[16/10] w-full rounded-2xl object-cover object-[78%_center] shadow-soft"
               />
               <img
                 src={WORKSHOP_PHOTOS.buildingExterior}
                 alt="Exterior of the Hastings Men's Shed showing the yellow and red entrance mural"
-                className="h-32 w-full rounded-2xl object-cover shadow-soft"
+                className="aspect-[16/10] w-full rounded-2xl object-cover object-[58%_center] shadow-soft"
               />
             </div>
-            <div className="absolute -bottom-5 -left-3 rounded-2xl bg-accent p-4 text-accent-foreground shadow-soft md:-left-8">
-              <p className="text-2xl font-extrabold">£3 a session</p>
-              <p className="text-xs font-bold">Tea, coffee &amp; biscuits included · £10 one-off joining fee</p>
+            <div className="flex items-center gap-3.5 rounded-2xl bg-accent px-5 py-4 text-accent-foreground shadow-soft">
+              <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-foreground/10">
+                <Coffee className="h-5 w-5" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-xl font-extrabold leading-tight sm:text-2xl">£3 a session</p>
+                <p className="mt-0.5 text-xs font-bold leading-snug sm:text-sm">
+                  Tea, coffee &amp; biscuits included · £10 one-off joining fee
+                </p>
+              </div>
             </div>
           </div>
         </div>
