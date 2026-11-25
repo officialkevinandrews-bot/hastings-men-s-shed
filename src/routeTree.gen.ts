@@ -11,11 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CommissionsRouteImport } from './routes/commissions'
 import { Route as DonateRouteImport } from './routes/donate'
 import { Route as MadeInTheShedRouteImport } from './routes/made-in-the-shed'
 import { Route as PoliciesRouteImport } from './routes/policies'
 import { Route as VisitRouteImport } from './routes/visit'
+import { Route as ApiMediaSplatRouteImport } from './routes/api/media/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -25,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommissionsRoute = CommissionsRouteImport.update({
@@ -52,73 +59,92 @@ const VisitRoute = VisitRouteImport.update({
   path: '/visit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMediaSplatRoute = ApiMediaSplatRouteImport.update({
+  id: '/api/media/$',
+  path: '/api/media/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/commissions': typeof CommissionsRoute
   '/donate': typeof DonateRoute
   '/made-in-the-shed': typeof MadeInTheShedRoute
   '/policies': typeof PoliciesRoute
   '/visit': typeof VisitRoute
+  '/api/media/$': typeof ApiMediaSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/commissions': typeof CommissionsRoute
   '/donate': typeof DonateRoute
   '/made-in-the-shed': typeof MadeInTheShedRoute
   '/policies': typeof PoliciesRoute
   '/visit': typeof VisitRoute
+  '/api/media/$': typeof ApiMediaSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/commissions': typeof CommissionsRoute
   '/donate': typeof DonateRoute
   '/made-in-the-shed': typeof MadeInTheShedRoute
   '/policies': typeof PoliciesRoute
   '/visit': typeof VisitRoute
+  '/api/media/$': typeof ApiMediaSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/commissions'
     | '/donate'
     | '/made-in-the-shed'
     | '/policies'
     | '/visit'
+    | '/api/media/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/admin'
     | '/commissions'
     | '/donate'
     | '/made-in-the-shed'
     | '/policies'
     | '/visit'
+    | '/api/media/$'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/commissions'
     | '/donate'
     | '/made-in-the-shed'
     | '/policies'
     | '/visit'
+    | '/api/media/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
   CommissionsRoute: typeof CommissionsRoute
   DonateRoute: typeof DonateRoute
   MadeInTheShedRoute: typeof MadeInTheShedRoute
   PoliciesRoute: typeof PoliciesRoute
   VisitRoute: typeof VisitRoute
+  ApiMediaSplatRoute: typeof ApiMediaSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -135,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/commissions': {
@@ -172,17 +205,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VisitRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/media/$': {
+      id: '/api/media/$'
+      path: '/api/media/$'
+      fullPath: '/api/media/$'
+      preLoaderRoute: typeof ApiMediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
   CommissionsRoute: CommissionsRoute,
   DonateRoute: DonateRoute,
   MadeInTheShedRoute: MadeInTheShedRoute,
   PoliciesRoute: PoliciesRoute,
   VisitRoute: VisitRoute,
+  ApiMediaSplatRoute: ApiMediaSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

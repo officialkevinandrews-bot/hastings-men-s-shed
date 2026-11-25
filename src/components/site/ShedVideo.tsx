@@ -1,18 +1,23 @@
+import { useSiteContent } from "@/lib/site-content";
+
 export function ShedVideo() {
+  const { images, pageContent } = useSiteContent();
+  const poster = images["video.poster"]?.image_url || "/videos/shed-poster.jpg";
+
   return (
     <section className="bg-primary py-20 text-primary-foreground" id="inside">
       <div className="mx-auto max-w-5xl px-4">
-        <p className="font-bold uppercase tracking-widest text-accent">Inside our charity &amp; workshops • Relaxing slideshow</p>
-        <h2 className="mt-2 text-3xl font-extrabold md:text-5xl">Take a look inside the Shed</h2>
-        <p className="mt-4 max-w-2xl text-primary-foreground/85">
-          The same relaxing slideshow that plays on a loop in our waiting area: our charitable mission, the Godfrey Bevan Workshops, our members, woodcarving and joinery projects, community restorations, wildlife builds, and our supporters — accompanied by calm soft piano and warm strings.
+        <p className="font-bold uppercase tracking-widest text-accent">
+          Inside our charity &amp; workshops • Relaxing slideshow
         </p>
+        <h2 className="mt-2 text-3xl font-extrabold md:text-5xl">{pageContent["video.heading"]}</h2>
+        <p className="mt-4 max-w-2xl text-primary-foreground/85">{pageContent["video.description"]}</p>
         <div className="mt-8 overflow-hidden rounded-2xl border-4 border-accent shadow-soft">
           <video
             controls
             loop
             preload="metadata"
-            poster="/videos/shed-poster.jpg"
+            poster={poster}
             className="aspect-video w-full bg-foreground"
             playsInline
           >

@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FileText, ShieldCheck, Scale, Users, HardHat, BookOpen, Mail, Phone, CheckCircle2 } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
-import { SITE, TRUSTEES } from "@/lib/site";
+import { SITE } from "@/lib/site";
+import { useSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/policies")({
   head: () => ({
@@ -49,10 +50,12 @@ const POLICY_DETAILS = [
 ] as const;
 
 function Policies() {
+  const { settings, trustees, pageContent } = useSiteContent();
+
   return (
     <>
-      <PageHero eyebrow={`Governance • Registered Charity No. ${SITE.charityNumber}`} title="Constitution, handbook & policies">
-        {SITE.legalName} is a Charitable Incorporated Organisation (CIO) registered with the Charity Commission for England and Wales (Charity No. {SITE.charityNumber}), governed by an elected board of unpaid volunteer Trustees.
+      <PageHero eyebrow={`Governance • Registered Charity No. ${SITE.charityNumber}`} title={pageContent["policies.heroTitle"] ?? "Constitution, handbook & policies"}>
+        {pageContent["policies.heroIntro"]}
       </PageHero>
 
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-16 md:grid-cols-2">
@@ -77,19 +80,19 @@ function Policies() {
             The income and property of the CIO are applied solely towards the promotion of its charitable objects. Our unpaid Charity Trustees are elected at the Annual General Meeting (AGM):
           </p>
           <ul className="mt-5 space-y-2.5">
-            {TRUSTEES.map((t) => (
-              <li key={t.name} className="flex items-center justify-between rounded-xl bg-background px-4 py-2.5 text-sm">
+            {trustees.map((t) => (
+              <li key={t.id || t.name} className="flex items-center justify-between rounded-xl bg-background px-4 py-2.5 text-sm">
                 <span className="font-bold">{t.name}</span>
                 <span className="font-semibold text-primary">{t.role}</span>
               </li>
             ))}
           </ul>
           <div className="mt-6 flex flex-wrap gap-3">
-            <a href={SITE.emailHref} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
+            <a href={settings.emailHref} className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
               <Mail className="h-4 w-4" /> Request full Constitution by email
             </a>
-            <a href={SITE.phoneHref} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-5 py-2.5 text-sm font-bold">
-              <Phone className="h-4 w-4 text-primary" /> {SITE.phone}
+            <a href={settings.phoneHref} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-5 py-2.5 text-sm font-bold">
+              <Phone className="h-4 w-4 text-primary" /> {settings.phone}
             </a>
           </div>
         </div>

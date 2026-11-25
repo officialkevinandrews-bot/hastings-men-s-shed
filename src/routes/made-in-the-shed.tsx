@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PageHero } from "@/components/site/PageHero";
 import { Gallery } from "@/components/site/Gallery";
 import { ShedVideo } from "@/components/site/ShedVideo";
+import { useSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/made-in-the-shed")({
   head: () => ({
@@ -16,10 +17,11 @@ export const Route = createFileRoute("/made-in-the-shed")({
 });
 
 function Made() {
+  const { pageContent } = useSiteContent();
   return (
     <>
-      <PageHero eyebrow="Made in the Shed" title="Projects, big and small">
-        From owl boxes and hedgehog houses to turned bowls and community commissions. Tap any photo to see it larger.
+      <PageHero eyebrow="Made in the Shed" title={pageContent["made.heroTitle"] ?? "Projects, big and small"}>
+        {pageContent["made.heroIntro"]}
       </PageHero>
       <section className="mx-auto max-w-6xl px-4 py-14"><Gallery /></section>
       <ShedVideo />

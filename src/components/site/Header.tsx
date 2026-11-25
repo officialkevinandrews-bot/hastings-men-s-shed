@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X, Heart, ShieldCheck } from "lucide-react";
-import logo from "@/assets/logo.jpg.asset.json";
 import { SITE } from "@/lib/site";
+import { useSiteContent } from "@/lib/site-content";
 import { FacebookIcon } from "@/components/site/FacebookIcon";
 
 const NAV = [
@@ -15,6 +15,9 @@ const NAV = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { settings, images } = useSiteContent();
+  const logoImg = images["site.logo"];
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
       <div className="stripe-bar h-1.5" />
@@ -27,11 +30,11 @@ export function Header() {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="hidden md:inline">
               Open to Men &amp; Women 18+ ·{" "}
-              <a href={SITE.emailHref} className="font-bold text-primary underline">{SITE.email}</a> ·{" "}
-              <a href={SITE.phoneHref} className="font-bold text-primary hover:underline">{SITE.phone}</a>
+              <a href={settings.emailHref} className="font-bold text-primary underline">{settings.email}</a> ·{" "}
+              <a href={settings.phoneHref} className="font-bold text-primary hover:underline">{settings.phone}</a>
             </span>
             <a
-              href={SITE.facebookUrl}
+              href={settings.facebook_url}
               target="_blank"
               rel="noreferrer"
               aria-label="Follow Hastings & St Leonards Men's Shed on Facebook"
@@ -46,7 +49,11 @@ export function Header() {
 
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <Link to="/" className="shrink-0" aria-label={`${SITE.name} home`}>
-          <img src={logo.url} alt={SITE.name} className="h-11 w-auto sm:h-12 md:h-14" />
+          <img
+            src={logoImg?.image_url}
+            alt={logoImg?.alt_text || SITE.name}
+            className="h-11 w-auto sm:h-12 md:h-14"
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
@@ -67,7 +74,7 @@ export function Header() {
             <Heart className="h-4 w-4 shrink-0" /> Support Our Charity
           </Link>
           <a
-            href={SITE.facebookUrl}
+            href={settings.facebook_url}
             target="_blank"
             rel="noreferrer"
             title="Follow us on Facebook"
@@ -80,7 +87,7 @@ export function Header() {
 
         <div className="flex items-center gap-2 lg:hidden">
           <a
-            href={SITE.facebookUrl}
+            href={settings.facebook_url}
             target="_blank"
             rel="noreferrer"
             title="Follow us on Facebook"
@@ -103,7 +110,7 @@ export function Header() {
             </Link>
           ))}
           <a
-            href={SITE.facebookUrl}
+            href={settings.facebook_url}
             target="_blank"
             rel="noreferrer"
             onClick={() => setOpen(false)}

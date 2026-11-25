@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart, Hammer, Coffee, Users, ShieldCheck, Wrench, Mail, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
 import { SITE } from "@/lib/site";
+import { useSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/donate")({
   head: () => ({
@@ -16,10 +17,12 @@ export const Route = createFileRoute("/donate")({
 });
 
 function Donate() {
+  const { settings, pageContent } = useSiteContent();
+
   return (
     <>
-      <PageHero eyebrow={`Support Registered UK Charity No. ${SITE.charityNumber}`} title="Help keep our workshop doors open">
-        {SITE.legalName} is run purely by unpaid volunteers. Every pound donated goes directly towards timber, tools, safety equipment, rent, utilities, and the all-important tea — ensuring anyone facing loneliness in Hastings &amp; St Leonards has a welcoming place to belong.
+      <PageHero eyebrow={`Support Registered UK Charity No. ${SITE.charityNumber}`} title={pageContent["donate.heroTitle"] ?? "Help keep our workshop doors open"}>
+        {pageContent["donate.heroIntro"]}
       </PageHero>
 
       <section className="mx-auto max-w-5xl px-4 py-16">
@@ -28,11 +31,9 @@ function Donate() {
             <ShieldCheck className="h-4 w-4" /> 100% Volunteer-Run Local Charity · No. {SITE.charityNumber}
           </span>
           <Heart className="mx-auto mt-4 h-12 w-12 text-accent" />
-          <h2 className="mt-4 text-3xl font-extrabold md:text-4xl">Donations Gratefully Received</h2>
-          <p className="mx-auto mt-3 max-w-xl text-lg text-primary-foreground/85">
-            Online donations are processed securely through SumUp. You can choose any amount that suits you — every contribution makes a direct difference in our community.
-          </p>
-          <a href={SITE.donateUrl} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-xl font-extrabold text-accent-foreground hover:brightness-95">
+          <h2 className="mt-4 text-3xl font-extrabold md:text-4xl">{pageContent["donate.boxHeading"]}</h2>
+          <p className="mx-auto mt-3 max-w-xl text-lg text-primary-foreground/85">{pageContent["donate.boxBody"]}</p>
+          <a href={settings.donate_url} target="_blank" rel="noreferrer" className="mt-8 inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-xl font-extrabold text-accent-foreground hover:brightness-95">
             <Heart className="h-5 w-5" /> Donate securely via SumUp
           </a>
         </div>
@@ -74,9 +75,7 @@ function Donate() {
           <div className="rounded-3xl border border-border bg-card p-8 shadow-soft">
             <Wrench className="h-8 w-8 text-primary" />
             <h3 className="mt-3 text-2xl font-extrabold">Donating tools or timber</h3>
-            <p className="mt-2 text-muted-foreground">
-              Have quality hand tools, power tools, or surplus timber looking for a good home? We inspect and PAT-test donated equipment for use in our workshops, and we partner with <strong>Tools With A Mission (TWAM)</strong> so that any excess tools are passed on to empower other makers rather than ending up in landfill.
-            </p>
+            <p className="mt-2 text-muted-foreground">{pageContent["donate.toolsBody"]}</p>
             <p className="mt-4 text-sm font-semibold">
               Please contact us before dropping off large equipment so we can make sure a duty officer is ready to receive it.
             </p>
@@ -89,8 +88,8 @@ function Donate() {
               You can also support our charity by commissioning a custom build, bringing an item in for repair, purchasing Shed-made items, or volunteering your time and skills.
             </p>
             <div className="mt-5 space-y-2 text-sm font-bold">
-              <a href={SITE.emailHref} className="flex items-center gap-2 text-primary hover:underline"><Mail className="h-4 w-4" /> {SITE.email}</a>
-              <a href={SITE.phoneHref} className="flex items-center gap-2 text-primary hover:underline"><Phone className="h-4 w-4" /> {SITE.phone}</a>
+              <a href={settings.emailHref} className="flex items-center gap-2 text-primary hover:underline"><Mail className="h-4 w-4" /> {settings.email}</a>
+              <a href={settings.phoneHref} className="flex items-center gap-2 text-primary hover:underline"><Phone className="h-4 w-4" /> {settings.phone}</a>
             </div>
             <Link to="/commissions" className="mt-5 inline-flex rounded-full bg-secondary px-5 py-2.5 text-sm font-bold text-primary hover:brightness-95">
               Enquire about a commission or repair →

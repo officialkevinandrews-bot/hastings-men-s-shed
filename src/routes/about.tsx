@@ -5,7 +5,6 @@ import {
   Landmark,
   HeartHandshake,
   Users,
-  Hammer,
   Recycle,
   ShieldCheck,
   Stethoscope,
@@ -13,8 +12,9 @@ import {
   Quote,
 } from "lucide-react";
 import { PageHero } from "@/components/site/PageHero";
-import { SITE, GRANT_SUPPORTERS, FRIENDS_OF_SHED, TRUSTEES, WORKSHOP_PHOTOS } from "@/lib/site";
-import { photo } from "@/lib/gallery";
+import { SITE } from "@/lib/site";
+import { focalPointClass } from "@/lib/cms-defaults";
+import { useSiteContent } from "@/lib/site-content";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -29,10 +29,26 @@ export const Route = createFileRoute("/about")({
 });
 
 function About() {
+  const { settings, images, pageContent, trustees, supporters, friends } = useSiteContent();
+
+  const aboutHall = images["about.mainHall"]!;
+  const sawSign = images["about.sawSign"]!;
+  const lunarProbe = images["about.lunarProbe"]!;
+  const toolsImg = images["about.toolsAndClamps"]!;
+  const metalImg = images["about.metalWorkshop"]!;
+  const sensoryImg = images["about.sensoryTrail"]!;
+  const highSheriff = images["civic.highSheriff"]!;
+  const highSheriffLetter = images["civic.highSheriffLetter"]!;
+  const lordLt = images["civic.lordLieutenant"]!;
+  const mpPhoto = images["civic.mpSallyAnn"]!;
+  const mpLetter = images["civic.mpSallyAnnLetter"]!;
+
+  const aboutSupporters = supporters.filter((s) => s.show_on_about);
+
   return (
     <>
-      <PageHero eyebrow={`Registered UK Charity No. ${SITE.charityNumber} (CIO)`} title="A workshop that's really about people">
-        The Hastings &amp; St Leonards Men's (and Women's) Shed is a volunteer-run UK charity dedicated to relieving loneliness, preventing social exclusion, and improving mental and physical wellbeing across Hastings, St Leonards, and the surrounding area.
+      <PageHero eyebrow={`Registered UK Charity No. ${SITE.charityNumber} (CIO)`} title={pageContent["about.heroTitle"] ?? "A workshop that's really about people"}>
+        {pageContent["about.heroIntro"]}
       </PageHero>
 
       {/* OFFICIAL MISSION STATEMENT & THE STORY OF THE SHED */}
@@ -44,43 +60,41 @@ function About() {
             </p>
             <h2 className="text-3xl font-extrabold md:text-4xl">What Hastings &amp; St Leonards Men's Shed is all about</h2>
             <blockquote className="rounded-2xl border-l-4 border-primary bg-card p-6 text-foreground shadow-soft">
-              <p className="font-semibold leading-relaxed">
-                "The Hastings &amp; St Leonards Men’s Shed aims to provide an environment where anyone at risk of social isolation can meet to socialise and pursue a hobby or project for their own benefit, or that of the Shed’s, or for the wider community. Through volunteering, skill-sharing and community service, we aim to increase confidence and self-worth at the same time as mitigating the effects of isolation, loneliness and exclusion."
-              </p>
+              <p className="font-semibold leading-relaxed">{pageContent["about.missionQuote"]}</p>
             </blockquote>
 
             <h3 className="pt-2 text-2xl font-extrabold">From a global movement to a local lifeline in Hastings</h3>
-            <p>
-              The Men’s Shed concept began in Australia around 1999 from a simple observation: people—and particularly older or retired men—often find it much easier to talk and form friendships <strong>shoulder to shoulder</strong> while making or mending something together than sitting face to face. The movement spread across the UK, Ireland, New Zealand, Canada, and Europe, with hundreds of Sheds now transforming lives nationwide.
-            </p>
-            <p>
-              We started our Shed in <strong>2016</strong> after identifying an urgent need right here in Hastings &amp; St Leonards. Located in one of the town's most deprived wards at <strong>The Godfrey Bevan Workshops (20 Manhattan Gardens)</strong>, our charity is run purely by unpaid volunteer Trustees and members.
-            </p>
-            <p>
-              You might assume from the traditional name that Men’s Sheds are only for men—<strong>however, we proudly welcome women too</strong>, and have regular women members who are an integral part of our workshop community. Whether you want to work on a complex woodworking or metalworking project, try woodcarving on a Monday morning, make items from our stock of recycled timber, or simply sit and chat with like-minded friends over a cup of tea and a biscuit, there is a place for you here.
-            </p>
+            <p>{pageContent["about.storyParagraph1"]}</p>
+            <p>{pageContent["about.storyParagraph2"]}</p>
+            <p>{pageContent["about.storyParagraph3"]}</p>
           </div>
 
           <div className="space-y-6">
             <figure className="overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
               <img
-                src={WORKSHOP_PHOTOS.mainHall}
-                alt="Inside the main woodworking hall at the Godfrey Bevan Workshops"
-                className="w-full object-cover"
+                src={aboutHall.image_url}
+                alt={aboutHall.alt_text}
+                className={`w-full object-cover ${focalPointClass(aboutHall.focal_point)}`}
               />
-              <figcaption className="p-5 text-sm text-muted-foreground">
-                <strong>The Godfrey Bevan Workshops:</strong> Members chatting and working side by side in our main hall in Ore, Hastings.
-              </figcaption>
+              <figcaption className="p-5 text-sm text-muted-foreground">{aboutHall.caption}</figcaption>
             </figure>
 
             <div className="grid grid-cols-2 gap-4">
               <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-                <img src={WORKSHOP_PHOTOS.manshedSawSign} alt="Hand-painted vintage MANSHED handsaw sign" className="aspect-[4/3] w-full object-cover" />
-                <figcaption className="p-3 text-xs font-semibold text-muted-foreground">Our hand-painted vintage saw sign inside the Shed</figcaption>
+                <img
+                  src={sawSign.image_url}
+                  alt={sawSign.alt_text}
+                  className={`aspect-[4/3] w-full object-cover ${focalPointClass(sawSign.focal_point)}`}
+                />
+                <figcaption className="p-3 text-xs font-semibold text-muted-foreground">{sawSign.caption}</figcaption>
               </figure>
               <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-                <img src={WORKSHOP_PHOTOS.lunarProbeCartoon} alt="Hastings Lunar Probe cartoon from the Shed" className="aspect-[4/3] w-full object-cover" />
-                <figcaption className="p-3 text-xs font-semibold text-muted-foreground">"Most importantly, we're having fun whilst doing it!"</figcaption>
+                <img
+                  src={lunarProbe.image_url}
+                  alt={lunarProbe.alt_text}
+                  className={`aspect-[4/3] w-full object-cover ${focalPointClass(lunarProbe.focal_point)}`}
+                />
+                <figcaption className="p-3 text-xs font-semibold text-muted-foreground">{lunarProbe.caption}</figcaption>
               </figure>
             </div>
           </div>
@@ -135,23 +149,39 @@ function About() {
       <section className="mx-auto max-w-6xl px-4 py-16">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div className="grid grid-cols-2 gap-4">
-            <img src={WORKSHOP_PHOTOS.toolsAndClamps} alt="Member working with power tools and clamps in the woodshop" className="aspect-square w-full rounded-2xl object-cover shadow-soft" />
-            <img src={WORKSHOP_PHOTOS.metalWorkshop} alt="The Shed's metalworking room and engineering lathe" className="aspect-square w-full rounded-2xl object-cover shadow-soft" />
-            <img src={photo("sensory-trail-1").url} alt="The Sensory Trail created by Shed members" className="col-span-2 aspect-[16/9] w-full rounded-2xl object-cover shadow-soft" />
+            <img
+              src={toolsImg.image_url}
+              alt={toolsImg.alt_text}
+              className={`aspect-square w-full rounded-2xl object-cover shadow-soft ${focalPointClass(toolsImg.focal_point)}`}
+            />
+            <img
+              src={metalImg.image_url}
+              alt={metalImg.alt_text}
+              className={`aspect-square w-full rounded-2xl object-cover shadow-soft ${focalPointClass(metalImg.focal_point)}`}
+            />
+            <img
+              src={sensoryImg.image_url}
+              alt={sensoryImg.alt_text}
+              className={`col-span-2 aspect-[16/9] w-full rounded-2xl object-cover shadow-soft ${focalPointClass(sensoryImg.focal_point)}`}
+            />
           </div>
           <div className="space-y-4 text-lg">
             <p className="font-bold uppercase tracking-widest text-primary">Facilities &amp; Referrals</p>
             <h2 className="text-3xl font-extrabold">Who we support — and how to refer someone</h2>
-            <p>
-              Our constitution defines social exclusion broadly: whether someone is experiencing loneliness in older age, living with a physical or learning disability, recovering from illness or bereavement, facing unemployment or financial hardship, or simply missing the camaraderie of a workplace, the Shed is here for them.
-            </p>
+            <p>{pageContent["about.referralsBody"]}</p>
             <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
               <h3 className="text-xl font-bold text-primary">Social Prescribers, Support Workers &amp; Families</h3>
-              <p className="mt-2 text-base text-muted-foreground">
-                We regularly welcome enquiries from <strong>GP social prescribing link workers, local health &amp; wellbeing teams, charities, and family members</strong> supporting a relative or friend who could benefit from company and purposeful activity.
-              </p>
+              <p className="mt-2 text-base text-muted-foreground">{pageContent["about.socialPrescribingBody"]}</p>
               <p className="mt-3 text-base text-muted-foreground">
-                You are very welcome to accompany someone on their first visit so they can look around the workshops and have a cup of tea at their own pace. Call us on <a href={SITE.phoneHref} className="font-bold text-primary underline">{SITE.phone}</a> or email <a href={SITE.emailHref} className="font-bold text-primary underline">{SITE.email}</a>.
+                Call us on{" "}
+                <a href={settings.phoneHref} className="font-bold text-primary underline">
+                  {settings.phone}
+                </a>{" "}
+                or email{" "}
+                <a href={settings.emailHref} className="font-bold text-primary underline">
+                  {settings.email}
+                </a>
+                .
               </p>
             </div>
           </div>
@@ -169,9 +199,13 @@ function About() {
 
           <div className="mt-10 grid gap-8 lg:grid-cols-3">
             {/* High Sheriff */}
-            <figure className="flex flex-col justify-between rounded-3xl border border-border bg-card overflow-hidden shadow-soft">
+            <figure className="flex flex-col justify-between overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
               <div>
-                <img src={WORKSHOP_PHOTOS.visitHighSheriff} alt="Lucinda Fraser DL, High Sheriff of East Sussex" className="h-56 w-full object-cover object-top" />
+                <img
+                  src={highSheriff.image_url}
+                  alt={highSheriff.alt_text}
+                  className={`h-56 w-full object-cover ${focalPointClass(highSheriff.focal_point)}`}
+                />
                 <div className="p-7">
                   <Quote className="h-8 w-8 text-primary" />
                   <blockquote className="mt-3 text-base italic leading-relaxed">
@@ -182,16 +216,20 @@ function About() {
               <figcaption className="border-t border-border bg-muted/40 px-7 py-4">
                 <span className="block font-extrabold">Lucinda Fraser DL</span>
                 <span className="text-sm text-muted-foreground">High Sheriff of East Sussex (April 2024 Visit)</span>
-                <a href={WORKSHOP_PHOTOS.letterHighSheriff} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary underline">
+                <a href={highSheriffLetter.image_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary underline">
                   <Mail className="h-3.5 w-3.5" /> View handwritten letter of support
                 </a>
               </figcaption>
             </figure>
 
             {/* Lord Lieutenant */}
-            <figure className="flex flex-col justify-between rounded-3xl border border-border bg-card overflow-hidden shadow-soft">
+            <figure className="flex flex-col justify-between overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
               <div>
-                <img src={WORKSHOP_PHOTOS.visitLordLieutenant} alt="Andrew Blackman, HM Lord-Lieutenant of East Sussex, visiting the Shed" className="h-56 w-full object-cover" />
+                <img
+                  src={lordLt.image_url}
+                  alt={lordLt.alt_text}
+                  className={`h-56 w-full object-cover ${focalPointClass(lordLt.focal_point)}`}
+                />
                 <div className="p-7">
                   <Landmark className="h-8 w-8 text-primary" />
                   <blockquote className="mt-3 text-base leading-relaxed">
@@ -206,9 +244,13 @@ function About() {
             </figure>
 
             {/* Local MP */}
-            <figure className="flex flex-col justify-between rounded-3xl border border-border bg-card overflow-hidden shadow-soft">
+            <figure className="flex flex-col justify-between overflow-hidden rounded-3xl border border-border bg-card shadow-soft">
               <div>
-                <img src={WORKSHOP_PHOTOS.visitMpSallyAnn} alt="Sally-Ann Hart visiting Shed members in the workshop" className="h-56 w-full object-cover" />
+                <img
+                  src={mpPhoto.image_url}
+                  alt={mpPhoto.alt_text}
+                  className={`h-56 w-full object-cover ${focalPointClass(mpPhoto.focal_point)}`}
+                />
                 <div className="p-7">
                   <Quote className="h-8 w-8 text-primary" />
                   <blockquote className="mt-3 text-base italic leading-relaxed">
@@ -219,7 +261,7 @@ function About() {
               <figcaption className="border-t border-border bg-muted/40 px-7 py-4">
                 <span className="block font-extrabold">Sally-Ann Hart</span>
                 <span className="text-sm text-muted-foreground">Former MP for Hastings &amp; Rye</span>
-                <a href={WORKSHOP_PHOTOS.letterMpSallyAnn} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary underline">
+                <a href={mpLetter.image_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary underline">
                   <Mail className="h-3.5 w-3.5" /> View signed letter extract
                 </a>
               </figcaption>
@@ -238,11 +280,11 @@ function About() {
           </p>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {FRIENDS_OF_SHED.map((f) => (
-            <div key={f.name} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+          {friends.map((f) => (
+            <div key={f.id || f.name} className="rounded-2xl border border-border bg-card p-6 shadow-soft">
               <span className="mb-3 block h-1.5 w-12 stripe-bar rounded-full" />
               <h3 className="text-xl font-bold">{f.name}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{f.desc}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{f.description}</p>
             </div>
           ))}
         </div>
@@ -260,16 +302,16 @@ function About() {
           </p>
 
           <div className="mt-8 grid gap-6 md:grid-cols-2">
-            {GRANT_SUPPORTERS.map((s) => (
-              <div key={s.name} className="flex flex-col justify-between rounded-2xl border border-border bg-background p-6 shadow-soft">
+            {aboutSupporters.map((s) => (
+              <div key={s.id || s.name} className="flex flex-col justify-between rounded-2xl border border-border bg-background p-6 shadow-soft">
                 <div>
                   <div className="flex items-center gap-4">
                     <div className="flex h-16 w-28 shrink-0 items-center justify-center rounded-xl border border-border bg-white p-2">
-                      <img src={s.logo} alt={s.name} className="max-h-12 w-auto max-w-full object-contain" loading="lazy" />
+                      <img src={s.logo_url} alt={s.name} className="max-h-12 w-auto max-w-full object-contain" loading="lazy" />
                     </div>
                     <h3 className="text-xl font-extrabold">{s.name}</h3>
                   </div>
-                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{s.description}</p>
                 </div>
               </div>
             ))}
@@ -290,8 +332,8 @@ function About() {
                 </div>
               </div>
               <ul className="space-y-3 rounded-2xl border border-border bg-card p-6">
-                {TRUSTEES.map((t) => (
-                  <li key={t.name} className="flex items-center justify-between border-b border-border pb-2.5 last:border-0 last:pb-0">
+                {trustees.map((t) => (
+                  <li key={t.id || t.name} className="flex items-center justify-between border-b border-border pb-2.5 last:border-0 last:pb-0">
                     <span className="font-bold">{t.name}</span>
                     <span className="text-sm font-semibold text-primary">{t.role}</span>
                   </li>
