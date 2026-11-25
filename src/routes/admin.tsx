@@ -277,7 +277,12 @@ function AdminPage() {
           )}
           {activeTab === "people" && (
             <ShedPeopleTab
-              key={`${dashboard.siteContent.settings.email}-${dashboard.siteContent.trustees.length}-${dashboard.siteContent.supporters.length}-${dashboard.siteContent.friends.length}`}
+              key={JSON.stringify([
+                dashboard.siteContent.settings,
+                dashboard.siteContent.trustees,
+                dashboard.siteContent.supporters,
+                dashboard.siteContent.friends,
+              ])}
               settings={dashboard.siteContent.settings}
               trustees={dashboard.siteContent.trustees}
               supporters={dashboard.siteContent.supporters}

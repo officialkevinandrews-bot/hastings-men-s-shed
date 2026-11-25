@@ -9,17 +9,29 @@ export const SITE_CONTENT_QUERY_KEY = ["public-site-content"] as const;
 const DEFAULT_BUNDLE = buildDefaultSiteContent();
 const SiteContentContext = createContext<SiteContentBundle>(DEFAULT_BUNDLE);
 
-export function SiteContentProvider({ children }: { children: ReactNode }) {
+export function SiteContentProvider({
+  children,
+  overrideData,
+}: {
+  children: ReactNode;
+  overrideData?: SiteContentBundle;
+}) {
   const fetchContent = useServerFn(getPublicSiteContent);
   const { data } = useQuery({
     queryKey: SITE_CONTENT_QUERY_KEY,
     queryFn: () => fetchContent(),
-    staleTime: 60_000,
+    enabled: !overrideData,
+    staleTime: 10_000,
+    refetchOnWindowFocus: true,
     placeholderData: DEFAULT_BUNDLE,
     retry: 1,
   });
 
-  return <SiteContentContext.Provider value={data ?? DEFAULT_BUNDLE}>{children}</SiteContentContext.Provider>;
+  return (
+    <SiteContentContext.Provider value={overrideData ?? data ?? DEFAULT_BUNDLE}>
+      {children}
+    </SiteContentContext.Provider>
+  );
 }
 
 export function useSiteContent(): SiteContentBundle {

@@ -268,6 +268,15 @@ const uploadMediaSchema = z.object({
   folder: z.enum(["gallery", "site", "supporters"]),
 });
 
+function base64ToUint8Array(base64: string): Uint8Array {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export const uploadAdminMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => uploadMediaSchema.parse(d))
@@ -275,8 +284,8 @@ export const uploadAdminMedia = createServerFn({ method: "POST" })
     await requireActiveAdmin(context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const fileBuffer = Buffer.from(data.base64Data, "base64");
-    if (fileBuffer.byteLength > 10 * 1024 * 1024) {
+    const fileBytes = base64ToUint8Array(data.base64Data);
+    if (fileBytes.byteLength > 10 * 1024 * 1024) {
       throw new Error("Image is larger than 10 MB after compression. Please pick a smaller image.");
     }
 
@@ -307,7 +316,7 @@ export const uploadAdminMedia = createServerFn({ method: "POST" })
     const safeFile = data.fileName.replace(/[^a-z0-9._-]+/gi, "-").toLowerCase();
     const objectPath = `${data.folder}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safeFile}`;
 
-    const { error: uploadErr } = await supabaseAdmin.storage.from("shed-media").upload(objectPath, fileBuffer, {
+    const { error: uploadErr } = await supabaseAdmin.storage.from("shed-media").upload(objectPath, fileBytes, {
       contentType: data.contentType,
       cacheControl: "31536000",
       upsert: false,
@@ -603,7 +612,7 @@ const galleryItemSchema = z.object({
   title: z.string().trim().min(1, "Please give this photo a name").max(140),
   category_id: z.string().uuid("Please choose a group"),
   image_url: z.string().trim().min(1, "Please upload a photo").max(1000),
-  sort_order: z.number().int().min(0).max(9999).optional(),
+  sort_order: z.number().int().min(-9999).max(9999).optional(),
   is_visible: z.boolean().default(true),
   is_featured: z.boolean().default(false),
   for_sale: z.boolean().default(false),
@@ -645,8 +654,8 @@ export const upsertGalleryItem = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    // Put brand new photos at the front or shift gracefully
-    const nextOrder = data.sort_order ?? Math.max(0, (minRow?.sort_order ?? 1) - 1);
+    // Put brand-new photos cleanly at the very front of the gallery
+    const nextOrder = data.sort_order ?? (minRow ? minRow.sort_order - 1 : 0);
     const uniqueSlug = `${slugify(data.title)}-${Date.now().toString(36)}`;
     const { error } = await supabaseAdmin.from("gallery_items").insert({
       slug: uniqueSlug,
