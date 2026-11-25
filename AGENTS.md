@@ -32,4 +32,6 @@ use the editor.
 ## Project rules
 - Site pages live as separate routes under src/routes with shared Header/Footer in __root; why: crawlable, shareable pages.
 - Shed photos are CDN asset pointers in src/assets/shed, captions/categories mapped in src/lib/gallery.ts; why: one place to edit the showcase.
-- Enquiries are inserted server-side via createServerFn (src/lib/enquiries.functions.ts) with RLS locking the table to service role; why: visitors can never read submissions.
+- Enquiries are inserted server-side via createServerFn; only the service role and active allowlisted admins may read submissions, with admin updates/deletes enforced by RLS; why: visitor submissions remain private.
+- Admin permissions live in the protected admin_users allowlist, never in profiles or editable auth metadata; JWT email and active/owner status are checked by database helpers; why: only owners can change the allowlist.
+- CMS tables expose public reads and restrict writes to active allowlisted admins; shed-media follows the same read/write boundary; why: public content stays accessible without exposing editing permissions.
