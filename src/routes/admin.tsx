@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -10,6 +10,7 @@ import {
   Clock,
   Megaphone,
   FileText,
+  Printer,
   Users,
   ShieldCheck,
   Globe,
@@ -17,6 +18,8 @@ import {
   ExternalLink,
   Loader2,
   RefreshCw,
+  AlertTriangle,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,6 +37,7 @@ import { SiteImagesTab } from "@/components/admin/SiteImagesTab";
 import { OpeningHoursTab } from "@/components/admin/OpeningHoursTab";
 import { NoticeBannerTab } from "@/components/admin/NoticeBannerTab";
 import { PageTextTab } from "@/components/admin/PageTextTab";
+import { FlyerStudioTab } from "@/components/admin/FlyerStudioTab";
 import { ShedPeopleTab } from "@/components/admin/ShedPeopleTab";
 import { AdminTeamTab } from "@/components/admin/AdminTeamTab";
 import { DomainGoLiveTab } from "@/components/admin/DomainGoLiveTab";
@@ -49,6 +53,11 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
+type PendingLeaveAction =
+  | { type: "tab"; tab: AdminTabKey }
+  | { type: "signout" }
+  | null;
+
 function AdminPage() {
   const queryClient = useQueryClient();
   const checkStatusFn = useServerFn(getAdminStatus);
@@ -59,6 +68,33 @@ function AdminPage() {
   const [dashboard, setDashboard] = useState<AdminDashboardPayload | null>(null);
   const [activeTab, setActiveTab] = useState<AdminTabKey>("overview");
   const [refreshing, setRefreshing] = useState(false);
+
+  // Unsaved-changes guard (used by Flyer Studio when navigating away or closing tab)
+  const [flyerDirty, setFlyerDirty] = useState(false);
+  const [flyerDirtyName, setFlyerDirtyName] = useState("");
+  const flyerSaveRef = useRef<() => Promise<boolean>>(async () => true);
+  const [pendingLeave, setPendingLeave] = useState<PendingLeaveAction>(null);
+  const [savingBeforeLeave, setSavingBeforeLeave] = useState(false);
+
+  const handleFlyerDirtyChange = useCallback(
+    (dirty: boolean, flyerName: string, saveHandler: () => Promise<boolean>) => {
+      setFlyerDirty(dirty);
+      setFlyerDirtyName(flyerName);
+      flyerSaveRef.current = saveHandler;
+    },
+    [],
+  );
+
+  // Warn before browser refresh / tab close if flyer has unsaved changes
+  useEffect(() => {
+    if (!flyerDirty) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [flyerDirty]);
 
   const verifyAndLoad = useCallback(async () => {
     setChecking(true);
@@ -115,11 +151,48 @@ function AdminPage() {
     }
   }, [loadDashboardFn, queryClient]);
 
-  async function handleSignOut() {
+  async function doSignOutNow() {
     await supabase.auth.signOut();
     setDashboard(null);
     setDeniedEmail(null);
+    setFlyerDirty(false);
     toast.success("Signed out safely");
+  }
+
+  function requestTabChange(nextTab: AdminTabKey) {
+    if (nextTab === activeTab) return;
+    if (activeTab === "flyer" && flyerDirty) {
+      setPendingLeave({ type: "tab", tab: nextTab });
+      return;
+    }
+    setActiveTab(nextTab);
+  }
+
+  function requestSignOut() {
+    if (activeTab === "flyer" && flyerDirty) {
+      setPendingLeave({ type: "signout" });
+      return;
+    }
+    doSignOutNow();
+  }
+
+  async function executePendingLeave(saveFirst: boolean) {
+    const action = pendingLeave;
+    if (!action) return;
+    if (saveFirst) {
+      setSavingBeforeLeave(true);
+      const ok = await flyerSaveRef.current();
+      setSavingBeforeLeave(false);
+      if (!ok) return;
+    } else {
+      setFlyerDirty(false);
+    }
+    setPendingLeave(null);
+    if (action.type === "tab") {
+      setActiveTab(action.tab);
+    } else if (action.type === "signout") {
+      await doSignOutNow();
+    }
   }
 
   if (checking) {
@@ -144,6 +217,7 @@ function AdminPage() {
     { key: "hours", label: "Opening Times", icon: Clock },
     { key: "notice", label: "Notice Banner", icon: Megaphone },
     { key: "text", label: "Website Text", icon: FileText },
+    { key: "flyer", label: "Flyer Studio", icon: Printer },
     { key: "people", label: "Fees & People", icon: Users },
   ];
 
@@ -193,7 +267,7 @@ function AdminPage() {
             </a>
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={requestSignOut}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-2 text-xs font-bold text-muted-foreground hover:border-destructive hover:text-destructive"
             >
               <LogOut className="h-3.5 w-3.5" /> Sign Out
@@ -203,7 +277,7 @@ function AdminPage() {
       </header>
 
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 lg:grid-cols-[240px_1fr] lg:py-8">
-        {/* Sidebar Navigation (horizontal scroll on mobile, sticky list on desktop) */}
+        {/* Sidebar Navigation */}
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <nav
             aria-label="Admin sections"
@@ -213,7 +287,7 @@ function AdminPage() {
               <button
                 key={key}
                 type="button"
-                onClick={() => setActiveTab(key)}
+                onClick={() => requestTabChange(key)}
                 className={cn(
                   "flex shrink-0 items-center justify-between gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-bold transition lg:w-full",
                   activeTab === key
@@ -226,14 +300,7 @@ function AdminPage() {
                   <span>{label}</span>
                 </span>
                 {badge !== undefined && (
-                  <span
-                    className={cn(
-                      "rounded-full px-2 py-0.5 text-xs font-extrabold",
-                      activeTab === key
-                        ? "bg-accent text-accent-foreground"
-                        : "bg-accent text-accent-foreground",
-                    )}
-                  >
+                  <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-extrabold text-accent-foreground">
                     {badge}
                   </span>
                 )}
@@ -244,7 +311,7 @@ function AdminPage() {
 
         {/* Main Active Tab Area */}
         <main className="min-w-0">
-          {activeTab === "overview" && <OverviewTab data={dashboard} onSelectTab={setActiveTab} />}
+          {activeTab === "overview" && <OverviewTab data={dashboard} onSelectTab={requestTabChange} />}
           {activeTab === "enquiries" && (
             <EnquiriesTab enquiries={dashboard.enquiries} onRefresh={handleRefresh} />
           )}
@@ -280,6 +347,15 @@ function AdminPage() {
               onRefresh={handleRefresh}
             />
           )}
+          {activeTab === "flyer" && (
+            <FlyerStudioTab
+              flyers={dashboard.flyers}
+              initialFlyerId={dashboard.lastFlyerId}
+              siteContent={dashboard.siteContent}
+              onRefresh={handleRefresh}
+              onDirtyStateChange={handleFlyerDirtyChange}
+            />
+          )}
           {activeTab === "people" && (
             <ShedPeopleTab
               key={JSON.stringify([
@@ -302,11 +378,60 @@ function AdminPage() {
               onRefresh={handleRefresh}
             />
           )}
-          {activeTab === "domain" && (
-            <DomainGoLiveTab currentAdmin={dashboard.currentAdmin} />
-          )}
+          {activeTab === "domain" && <DomainGoLiveTab currentAdmin={dashboard.currentAdmin} />}
         </main>
       </div>
+
+      {/* Global Unsaved Flyer Changes Modal (with Built-In Save Button!) */}
+      {pendingLeave && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/70 p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-soft">
+            <div className="flex items-start gap-3">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground">
+                <AlertTriangle className="h-5 w-5" />
+              </span>
+              <div>
+                <h3 className="text-lg font-extrabold">You have unsaved flyer changes</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Would you like to save your changes to <strong>{flyerDirtyName}</strong> before leaving the Flyer
+                  Studio?
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                disabled={savingBeforeLeave}
+                onClick={() => setPendingLeave(null)}
+                className="rounded-xl border border-border bg-background px-3.5 py-2 text-sm font-bold"
+              >
+                Keep Editing
+              </button>
+              <button
+                type="button"
+                disabled={savingBeforeLeave}
+                onClick={() => executePendingLeave(false)}
+                className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-2 text-sm font-bold text-destructive"
+              >
+                Leave Without Saving
+              </button>
+              <button
+                type="button"
+                disabled={savingBeforeLeave}
+                onClick={() => executePendingLeave(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-soft hover:brightness-110"
+              >
+                {savingBeforeLeave ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Save &amp; Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

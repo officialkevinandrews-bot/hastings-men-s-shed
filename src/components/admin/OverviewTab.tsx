@@ -5,6 +5,7 @@ import {
   Megaphone,
   Images,
   FileText,
+  Printer,
   Users,
   ShieldCheck,
   Globe,
@@ -22,6 +23,7 @@ export type AdminTabKey =
   | "notice"
   | "text"
   | "people"
+  | "flyer"
   | "admins"
   | "domain";
 
@@ -78,6 +80,12 @@ export function OverviewTab({ data, onSelectTab }: OverviewTabProps) {
       icon: FileText,
       title: "Edit page wording & parking note",
       desc: "Update welcome text, mission statements, and visitor instructions safely.",
+    },
+    {
+      tab: "flyer",
+      icon: Printer,
+      title: "Edit, download & print Shed flyers",
+      desc: "Customise the A5 flyer, save event copies, and print single or double-sided.",
     },
     {
       tab: "people",

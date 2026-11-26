@@ -23,7 +23,7 @@ export const getPublicSiteContent = createServerFn({ method: "GET" }).handler(
         supabase.from("site_images").select("*"),
         supabase.from("gallery_categories").select("*").order("sort_order", { ascending: true }),
         supabase.from("gallery_items").select("*").order("sort_order", { ascending: true }),
-        supabase.from("page_content").select("content_key,value_text"),
+        supabase.from("page_content").select("content_key,value_text").neq("page_group", "flyer_studio"),
         supabase.from("trustees").select("*").order("sort_order", { ascending: true }),
         supabase.from("supporters").select("*").order("sort_order", { ascending: true }),
         supabase.from("friends_of_shed").select("*").order("sort_order", { ascending: true }),

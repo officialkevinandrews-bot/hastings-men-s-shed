@@ -14,6 +14,12 @@ import {
   buildKualoSupportTicket,
   evaluateDomainDns,
 } from "@/lib/domain-check";
+import {
+  FLYER_MASTER_ID,
+  createMasterFlyerTemplate,
+  normalizeFlyerDocument,
+  resolveFlyerForRender,
+} from "@/lib/flyer-types";
 
 describe("CMS defaults and safe merging", () => {
   it("provides complete defaults for all image slots, text blocks, hours, and gallery items", () => {
@@ -166,5 +172,71 @@ describe("CMS defaults and safe merging", () => {
     expect(ticket).toContain(KUALO_ORIGIN_IP);
     expect(ticket).toContain(LOVABLE_TARGET_IP);
     expect(ticket).toContain("lovable_verify=xyz999");
+  });
+
+  it("provides a protected master flyer template, normalizes partial copies, and syncs live website data", () => {
+    const master = createMasterFlyerTemplate();
+    expect(master.id).toBe(FLYER_MASTER_ID);
+    expect(master.isMaster).toBe(true);
+    expect(master.syncFromWebsite).toBe(true);
+    expect(master.front.craftLeftCaption).toContain("horse head");
+    expect(master.front.craftRightCaption).toContain("owl");
+    expect(master.back.qrUrl).toBe("https://www.hastingsmenshed.org.uk/");
+
+    // Partial copy should inherit safe defaults and never be marked as master
+    const customCopy = normalizeFlyerDocument({
+      id: "summer-fete-2026",
+      name: "Summer Open Day Flyer",
+      isMaster: true,
+      syncFromWebsite: false,
+      front: { ...master.front, headlineLine1: "Summer Open Day!" },
+    });
+    expect(customCopy.id).toBe("summer-fete-2026");
+    expect(customCopy.isMaster).toBe(false);
+    expect(customCopy.syncFromWebsite).toBe(false);
+    expect(customCopy.front.headlineLine1).toBe("Summer Open Day!");
+    expect(customCopy.back.customHours).toHaveLength(7);
+
+    // Live website sync vs custom manual schedule/fees
+    const liveSite = buildDefaultSiteContent();
+    liveSite.settings.joining_fee = "£15.00";
+    liveSite.settings.session_fee = "£4.00";
+    liveSite.settings.phone = "01424 999888";
+    liveSite.settings.email = "new@hastingsmenshed.org.uk";
+    liveSite.openingHours[3] = {
+      ...liveSite.openingHours[3]!,
+      is_open: true,
+      hours_display: "10:00am – 2:00pm",
+      note: "General Workshop Session",
+    };
+
+    const synced = resolveFlyerForRender(master, liveSite);
+    expect(synced.joiningFee).toBe("£15");
+    expect(synced.sessionFee).toBe("£4");
+    expect(synced.phone).toBe("01424 999888");
+    expect(synced.email).toBe("new@hastingsmenshed.org.uk");
+    expect(synced.commissionsFooter).toBe("Email: new@hastingsmenshed.org.uk");
+    expect(synced.schedule[3]?.isOpen).toBe(true);
+    expect(synced.schedule[3]?.note).toBe("General Session");
+    expect(synced.supporters).toHaveLength(8);
+    expect(synced.logoUrl).toBe("/images/flyer/shed-logo-transparent.png");
+
+    // When syncFromWebsite is false, manual flyer copy fields stay untouched
+    const manualCopy = normalizeFlyerDocument({
+      id: "special-event",
+      name: "Special Event",
+      syncFromWebsite: false,
+      back: {
+        ...master.back,
+        joiningFee: "FREE",
+        sessionFee: "£0",
+        phone: "01424 000000",
+      },
+    });
+    const resolvedManual = resolveFlyerForRender(manualCopy, liveSite);
+    expect(resolvedManual.joiningFee).toBe("FREE");
+    expect(resolvedManual.sessionFee).toBe("£0");
+    expect(resolvedManual.phone).toBe("01424 000000");
+    expect(resolvedManual.schedule[3]?.isOpen).toBe(false);
   });
 });

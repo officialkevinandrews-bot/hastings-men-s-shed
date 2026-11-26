@@ -15,6 +15,15 @@ import {
   type DomainDnsSnapshot,
   type EvaluatedDomainStatus,
 } from "@/lib/domain-check";
+import {
+  FLYER_KEY_PREFIX,
+  FLYER_MASTER_ID,
+  FLYER_PAGE_GROUP,
+  FLYER_PREF_PREFIX,
+  createMasterFlyerTemplate,
+  normalizeFlyerDocument,
+  type FlyerDocument,
+} from "@/lib/flyer-types";
 
 export interface AdminUserRecord {
   id: string;
@@ -43,6 +52,8 @@ export interface AdminDashboardPayload {
   siteContent: SiteContentBundle;
   enquiries: EnquiryRecord[];
   admins: AdminUserRecord[];
+  flyers: FlyerDocument[];
+  lastFlyerId: string;
 }
 
 function extractEmailFromClaims(claims: unknown): string {
@@ -211,13 +222,50 @@ export const getAdminDashboardData = createServerFn({ method: "GET" })
       supabaseAdmin.from("site_images").select("*"),
       supabaseAdmin.from("gallery_categories").select("*").order("sort_order", { ascending: true }),
       supabaseAdmin.from("gallery_items").select("*").order("sort_order", { ascending: true }),
-      supabaseAdmin.from("page_content").select("content_key,value_text"),
+      supabaseAdmin.from("page_content").select("content_key,page_group,value_text"),
       supabaseAdmin.from("trustees").select("*").order("sort_order", { ascending: true }),
       supabaseAdmin.from("supporters").select("*").order("sort_order", { ascending: true }),
       supabaseAdmin.from("friends_of_shed").select("*").order("sort_order", { ascending: true }),
       supabaseAdmin.from("commission_enquiries").select("*").order("created_at", { ascending: false }),
       supabaseAdmin.from("admin_users").select("*").order("created_at", { ascending: true }),
     ]);
+
+    const allContentRows = contentRes.data ?? [];
+    const regularPageContent = allContentRows
+      .filter((r) => r.page_group !== FLYER_PAGE_GROUP)
+      .map((r) => ({ content_key: r.content_key, value_text: r.value_text }));
+
+    const flyerMap = new Map<string, FlyerDocument>();
+    flyerMap.set(FLYER_MASTER_ID, createMasterFlyerTemplate());
+    let lastFlyerId = FLYER_MASTER_ID;
+    const myPrefKey = `${FLYER_PREF_PREFIX}${currentAdmin.id}`;
+
+    for (const row of allContentRows) {
+      if (row.page_group !== FLYER_PAGE_GROUP) continue;
+      if (row.content_key === myPrefKey) {
+        lastFlyerId = row.value_text.trim() || FLYER_MASTER_ID;
+        continue;
+      }
+      if (row.content_key.startsWith(FLYER_KEY_PREFIX)) {
+        try {
+          const parsed = JSON.parse(row.value_text) as Partial<FlyerDocument> & { id?: string };
+          const id = parsed.id || row.content_key.slice(FLYER_KEY_PREFIX.length);
+          flyerMap.set(id, normalizeFlyerDocument({ ...parsed, id }));
+        } catch {
+          // ignore malformed JSON
+        }
+      }
+    }
+
+    const flyers = Array.from(flyerMap.values()).sort((a, b) => {
+      if (a.isMaster) return -1;
+      if (b.isMaster) return 1;
+      return b.updatedAt.localeCompare(a.updatedAt);
+    });
+
+    if (!flyerMap.has(lastFlyerId)) {
+      lastFlyerId = FLYER_MASTER_ID;
+    }
 
     const raw: RawCmsTables = {
       settings: settingsRes.data ?? null,
@@ -226,7 +274,7 @@ export const getAdminDashboardData = createServerFn({ method: "GET" })
       siteImages: imagesRes.data ?? [],
       galleryCategories: catsRes.data ?? [],
       galleryItems: itemsRes.data ?? [],
-      pageContent: contentRes.data ?? [],
+      pageContent: regularPageContent,
       trustees: trusteesRes.data ?? [],
       supporters: supportersRes.data ?? [],
       friends: friendsRes.data ?? [],
@@ -262,6 +310,8 @@ export const getAdminDashboardData = createServerFn({ method: "GET" })
       siteContent: mergeSiteContent(raw),
       enquiries,
       admins,
+      flyers,
+      lastFlyerId,
     };
   });
 
@@ -993,4 +1043,174 @@ export const checkDomainDnsStatus = createServerFn({ method: "GET" })
     };
 
     return { snapshot, status: evaluateDomainDns(snapshot) };
+  });
+
+// ---------- FLYER STUDIO PERSISTENCE (ALL AUTHORISED COMMITTEE ADMINS) ----------
+
+const flyerFocalSchema = z.enum(["center", "upper", "top", "bottom", "left", "right"]);
+
+const saveFlyerSchema = z.object({
+  id: z.string().trim().min(1).max(80).regex(/^[a-z0-9-]+$/i),
+  name: z.string().trim().min(1, "Please give your flyer a name").max(120),
+  isMaster: z.boolean(),
+  syncFromWebsite: z.boolean(),
+  front: z.object({
+    topPill1: z.string().max(120),
+    topPill2: z.string().max(120),
+    eyebrow: z.string().max(180),
+    headlineLine1: z.string().max(120),
+    headlineLine2: z.string().max(120),
+    intro: z.string().max(600),
+    mainPhotoUrl: z.string().max(1000),
+    mainPhotoCaption: z.string().max(180),
+    mainPhotoFocal: flyerFocalSchema,
+    craftLeftUrl: z.string().max(1000),
+    craftLeftCaption: z.string().max(140),
+    craftLeftFocal: flyerFocalSchema,
+    craftRightUrl: z.string().max(1000),
+    craftRightCaption: z.string().max(140),
+    craftRightFocal: flyerFocalSchema,
+    wellbeingEyebrow: z.string().max(160),
+    wellbeingHeading: z.string().max(140),
+    wellbeingPara1: z.string().max(600),
+    wellbeingPara2: z.string().max(600),
+    pill1: z.string().max(60),
+    pill2: z.string().max(60),
+    pill3: z.string().max(60),
+    footerBar: z.string().max(200),
+  }),
+  back: z.object({
+    eyebrow: z.string().max(160),
+    heading: z.string().max(120),
+    intro: z.string().max(500),
+    hoursTitle: z.string().max(100),
+    customHours: z.array(
+      z.object({
+        day: z.string().max(30),
+        hours: z.string().max(60),
+        note: z.string().max(80),
+        isOpen: z.boolean(),
+      }),
+    ).max(10),
+    feesTitle: z.string().max(100),
+    joiningFee: z.string().max(30),
+    joiningFeeLabel: z.string().max(80),
+    joiningFeeSub: z.string().max(80),
+    sessionFee: z.string().max(30),
+    sessionFeeLabel: z.string().max(80),
+    sessionFeeSub: z.string().max(80),
+    feesFootnote: z.string().max(240),
+    locationTitle: z.string().max(100),
+    addressLines: z.array(z.string().max(120)).max(6),
+    parkingNote: z.string().max(400),
+    exteriorPhotoUrl: z.string().max(1000),
+    exteriorPhotoFocal: flyerFocalSchema,
+    qrPillText: z.string().max(80),
+    qrUrl: z.string().trim().min(4).max(400),
+    qrDisplayUrl: z.string().max(120),
+    qrHelpText: z.string().max(240),
+    contactTitle: z.string().max(100),
+    phone: z.string().max(50),
+    phoneHoursNote: z.string().max(100),
+    email: z.string().max(140),
+    facebookText: z.string().max(120),
+    commissionsTitle: z.string().max(100),
+    commissionsBody: z.string().max(500),
+    commissionsFooter: z.string().max(120),
+    referralsTitle: z.string().max(100),
+    referralsBody: z.string().max(500),
+    referralsFooter: z.string().max(120),
+    showSupporters: z.boolean(),
+    supportersHeading: z.string().max(140),
+  }),
+});
+
+export const saveFlyerDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => saveFlyerSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const admin = await requireActiveAdmin(context.claims);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const now = new Date().toISOString();
+
+    const fullDoc: FlyerDocument = {
+      ...data,
+      isMaster: data.id === FLYER_MASTER_ID,
+      updatedAt: now,
+      updatedBy: admin.display_name || admin.email,
+    };
+
+    const { error } = await supabaseAdmin.from("page_content").upsert(
+      [
+        {
+          content_key: `${FLYER_KEY_PREFIX}${fullDoc.id}`,
+          page_group: FLYER_PAGE_GROUP,
+          label: fullDoc.name,
+          value_text: JSON.stringify(fullDoc),
+          updated_at: now,
+        },
+        {
+          content_key: `${FLYER_PREF_PREFIX}${admin.id}`,
+          page_group: FLYER_PAGE_GROUP,
+          label: "Last opened flyer",
+          value_text: fullDoc.id,
+          updated_at: now,
+        },
+      ],
+      { onConflict: "content_key" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true as const, flyer: fullDoc };
+  });
+
+const flyerIdSchema = z.object({ id: z.string().trim().min(1).max(80) });
+
+export const deleteFlyerDocument = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => flyerIdSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await requireActiveAdmin(context.claims);
+    if (data.id === FLYER_MASTER_ID) {
+      throw new Error("The Master Shed Flyer cannot be deleted. You can reset it to original instead.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("page_content")
+      .delete()
+      .eq("content_key", `${FLYER_KEY_PREFIX}${data.id}`);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const resetMasterFlyer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await requireActiveAdmin(context.claims);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("page_content")
+      .delete()
+      .eq("content_key", `${FLYER_KEY_PREFIX}${FLYER_MASTER_ID}`);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, flyer: createMasterFlyerTemplate() };
+  });
+
+export const setLastOpenedFlyer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => flyerIdSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const admin = await requireActiveAdmin(context.claims);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("page_content").upsert(
+      {
+        content_key: `${FLYER_PREF_PREFIX}${admin.id}`,
+        page_group: FLYER_PAGE_GROUP,
+        label: "Last opened flyer",
+        value_text: data.id,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "content_key" },
+    );
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
   });
